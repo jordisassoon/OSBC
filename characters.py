@@ -2,7 +2,8 @@ import os
 from PIL import Image
 from models.nCLIPClassifier import nCLIPClassifier
 from models.bCLIPClassifier import bCLIPClassifier
-from sklearn.metrics import accuracy_score
+from dataloaders.image_loader import ImageLoader
+from validation.score import Score
 from tqdm import tqdm
 
 image_array = []
@@ -18,10 +19,12 @@ for i in tqdm(range(26)):
             image_array.append(Image.open(folder_dir + "/" + image))
             truth.append(i)
 
-print(len(truth))
+image_loader = ImageLoader(images_dir='archive/data/testing_data')
 
 bCLIPClassifier = bCLIPClassifier()
 nCLIPClassifier = nCLIPClassifier()
+
+scorer = Score(image_array, truth)
 
 labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
           'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
@@ -35,5 +38,4 @@ for label in labels:
     embeddings_bclip.append(bCLIPClassifier.forward(label))
     embeddings_nclip.append(nCLIPClassifier.forward(label))
 
-print(accuracy_score(bCLIPClassifier.batch_predict(image_array, embeddings_bclip), truth))
-print(accuracy_score(nCLIPClassifier.batch_predict(image_array, embeddings_nclip), truth))
+print(scorer.batch_score(nCLIPClassifier, embeddings_nclip, image_loader.get_loader()))

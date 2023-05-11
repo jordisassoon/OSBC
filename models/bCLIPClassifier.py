@@ -3,10 +3,7 @@ from .heads.BERT import BERT
 from .heads.CLIP import CLIP
 import numpy as np
 import torch
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
-import spacy
-nlp = spacy.load("en_core_web_sm")
+from tqdm import tqdm
 
 
 class Embedding:
@@ -24,77 +21,33 @@ class Embedding:
 class bCLIPClassifier:
     def __init__(self):
         self.OCR = OCR(config='--psm 10')
-        self.BERT = BERT(model_name="bert-base-cased")
+        self.BERT = BERT(tokenizer_name="bert-base-cased", st_name='all-mpnet-base-v2')
         self.CLIP = CLIP(model_name="RN50")
 
-    def extract_text(self, image):
-        return self.OCR.extract_text(image)
-
-    def summarize(self, text):
-        return self.BERT.summarize(text)
-
-    def encode_image(self, image):
-        return self.CLIP.encode_image(image)
-
-    def encode_description(self, text):
-        return self.CLIP.encode_text(text)
-
-    @staticmethod
-    def preprocess_text(sentence):
-        """
-        Lemmatize, lowercase, remove numbers and stop words
-
-        Args:
-          sentence: The sentence we want to process.
-
-        Returns:
-          A list of processed words
-        """
-        sentence = [token.lemma_.lower()
-                    for token in nlp(sentence)
-                    if token.is_alpha]
-
-        return ' '.join(sentence)
-
+    @torch.no_grad()
     def forward(self, label):
         # returns the image and text embeddings, where the text is extended with OCR
-        description = "a photo of the number " + label
-        # print(extracted_text)
-        # summarized_text = self.summarize(extracted_text)
-        # print(summarized_text)
-        return Embedding(self.encode_description(description), label)
-
-    @staticmethod
-    def clip_similarity(query, descriptions, dim=1):
-        cos = torch.nn.CosineSimilarity(dim=dim, eps=1e-6)
-        return list(map(lambda x: cos(query, x).item(), descriptions))
-
-    @staticmethod
-    def bert_similarity(query, sentence_embeddings, alpha):
-        return cosine_similarity([query], sentence_embeddings)[0] * alpha
+        description = "an image of the letter: " + label
+        return Embedding(self.CLIP.encode_text(description), label)
 
     @torch.no_grad()
-    def predict(self, image, embeddings):
-        clip_query = self.encode_image(image)
-        descriptions = list(map(lambda x: x.get_description(), embeddings))
-        clip_similarity = self.clip_similarity(clip_query, descriptions)
+    def predict(self, image, descriptions, encoded_sentences):
+        clip_query = self.CLIP.encode_image(image).squeeze()
+        clip_similarity = self.CLIP.similarity_score(clip_query, descriptions)
 
-        extracted_text = self.extract_text(image)
-        extracted_text = self.preprocess_text(extracted_text)
+        extracted_text = self.OCR.extract_text(image)
+        extracted_text = self.BERT.preprocess_text(extracted_text, stop_words=True)
 
         if extracted_text == '':
             return np.argmax(clip_similarity)
 
-        model = SentenceTransformer('stsb-mpnet-base-v2')
+        encoded_text = self.BERT.encode_sentences(extracted_text)
 
-        sentences = list(map(lambda x: x.get_text(), embeddings))
-        sentences.append(extracted_text)
-
-        sentence_embeddings = model.encode(sentences)
-
-        bert_similarity = self.bert_similarity(sentence_embeddings[-1], sentence_embeddings[:-1], 1)
+        bert_similarity = self.BERT.similarity_score(encoded_text, encoded_sentences, 1)
 
         return np.argmax(clip_similarity + bert_similarity)
 
     def batch_predict(self, queries, embeddings):
-        return list(map(lambda x: self.predict(x, embeddings), queries))
+        descriptions = torch.stack(list(map(lambda x: x.get_description().squeeze(), embeddings)), 0)
+        encoded_sentences = self.BERT.encode_sentences(list(map(lambda x: x.get_text(), embeddings)))
+        return list(map(lambda x: self.predict(x, descriptions, encoded_sentences), tqdm(queries)))
