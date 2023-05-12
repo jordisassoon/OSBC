@@ -18,7 +18,7 @@ class Embedding:
         return self.raw_text
 
 
-class bCLIPClassifier:
+class OCRClassifier:
     def __init__(self):
         self.OCR = OCR(config='--psm 10')
         self.BERT = BERT(tokenizer_name="bert-base-cased", st_name='all-mpnet-base-v2')
@@ -41,23 +41,16 @@ class bCLIPClassifier:
         return Embedding(self.CLIP.encode_text(description), label)
 
     @torch.no_grad()
-    def predict(self, image, descriptions, encoded_sentences):
-        clip_query = self.CLIP.encode_image(image).squeeze()
-        clip_similarity = self.CLIP.similarity_score(clip_query, descriptions)
-
+    def predict(self, image, encoded_sentences):
         extracted_text = self.OCR.extract_text(image)
         extracted_text = self.BERT.preprocess_text(extracted_text, stop_words=True)
-
-        if extracted_text == '':
-            return np.argmax(clip_similarity)
 
         encoded_text = self.BERT.encode_sentences(extracted_text)
 
         bert_similarity = self.BERT.similarity_score(encoded_text, encoded_sentences, 1)
 
-        return np.argmax(clip_similarity + bert_similarity)
+        return np.argmax(bert_similarity)
 
     def batch_predict(self, queries):
-        descriptions = self.get_description_tensors()
         inner_texts = self.get_inner_text_tensors()
-        return list(map(lambda x: self.predict(x, descriptions, inner_texts), tqdm(queries)))
+        return list(map(lambda x: self.predict(x, inner_texts), tqdm(queries)))

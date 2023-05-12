@@ -1,6 +1,6 @@
 import torch
 import clip
-from tqdm import tqdm
+import torchvision
 
 
 class CLIP:

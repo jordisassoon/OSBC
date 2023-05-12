@@ -16,7 +16,14 @@ class Embedding:
 
 class nCLIPClassifier:
     def __init__(self):
-        self.CLIP = CLIP(model_name="RN50")
+        self.CLIP = CLIP(model_name="ViT-L/14")
+        self.embeddings = None
+
+    def set_embeddings(self, embeddings):
+        self.embeddings = embeddings
+
+    def get_description_tensors(self):
+        return torch.stack((list(map(lambda x: x.get_description().squeeze(), self.embeddings))), 0)
 
     @torch.no_grad()
     def forward(self, label):
@@ -32,6 +39,6 @@ class nCLIPClassifier:
 
         return np.argmax(clip_similarity)
 
-    def batch_predict(self, queries, embeddings):
-        descriptions = torch.stack(list(map(lambda x: x.get_description().squeeze(), embeddings)), 0)
+    def batch_predict(self, queries):
+        descriptions = self.get_description_tensors()
         return list(map(lambda x: self.predict(x, descriptions), tqdm(queries)))
