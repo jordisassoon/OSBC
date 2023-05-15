@@ -38,6 +38,7 @@ class teCLIPRetriever:
     def format_and_extend(template, extracted_text, description):
         return description + template.format(extracted_text)
 
+    @torch.no_grad()
     def forward(self, image, description, template):
         # returns the image and text embeddings, where the text is extended with OCR
         extracted_text = self.OCR.extract_text(image)

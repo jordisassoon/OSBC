@@ -6,12 +6,15 @@ import pandas as pd
 from tqdm import tqdm
 from PIL import Image
 from validation.score import Score
+import torch
 
 path = "data/dilbert/"
 
 df = pd.read_csv(path + "annotations.csv")
+df = df.drop(["col1", "col2", "col3"], axis=1)
+df = df.dropna()
 filenames = df["original_filename"]
-query_texts = df["Comics_text_box"]
+query_texts = df["Comics_text_box"].astype("string")
 
 images = []
 truth = []
@@ -26,7 +29,7 @@ embeddings_bert = []
 embeddings_bclip = []
 embeddings_nclip = []
 embeddings_teclip = []
-bert = BERTRetriever()
+bert = BERTRetriever()  # acc = 0.7346570397111913
 bCLIP = bCLIPRetriever()
 nCLIP = nCLIPRetriever()
 teCLIP = teCLIPRetriever()

@@ -24,6 +24,7 @@ class nCLIPRetriever:
     def set_embeddings(self, embeddings):
         self.embeddings = embeddings
 
+    @torch.no_grad()
     def forward(self, image, description):
         return CEmbedding(self.CLIP.encode_image(image), self.CLIP.encode_text(description))
 

@@ -29,6 +29,7 @@ class BERTRetriever:
     def get_inner_text_tensors(self):
         return self.BERT.encode_text(list(map(lambda x: x.get_text(), self.embeddings)))
 
+    @torch.no_grad()
     def forward(self, image, description):
         # returns the image and text embeddings, where the text is extended with OCR
         extracted_text = self.OCR.extract_text(image)
