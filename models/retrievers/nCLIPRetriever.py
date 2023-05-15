@@ -1,6 +1,7 @@
 from models.heads.CLIP import CLIP
 import numpy as np
 import torch
+from tqdm import tqdm
 
 
 class CEmbedding:
@@ -29,19 +30,14 @@ class nCLIPRetriever:
     def get_image_tensors(self):
         return torch.stack((list(map(lambda x: x.get_image().squeeze(), self.embeddings))), 0)
 
-    def get_description_tensors(self):
-        return torch.stack((list(map(lambda x: x.get_description().squeeze(), self.embeddings))), 0)
-
     @torch.no_grad()
-    def predict(self, query, descriptions, images):
+    def predict(self, query, images):
         clip_query = self.CLIP.encode_text(query)
 
-        clip_text_similarity = self.CLIP.similarity_score(clip_query, descriptions)
         clip_image_similarity = self.CLIP.similarity_score(clip_query, images)
 
-        return np.argmax(clip_text_similarity + clip_image_similarity)
+        return np.argmax(clip_image_similarity)
 
     def batch_predict(self, queries):
-        descriptions = self.get_description_tensors()
         images = self.get_image_tensors()
-        return list(map(lambda x: self.predict(x, descriptions, images), queries))
+        return list(map(lambda x: self.predict(x, images), tqdm(queries)))

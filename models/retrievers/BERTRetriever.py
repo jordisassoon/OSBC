@@ -2,6 +2,7 @@ from models.heads.OCR import OCR
 from models.heads.BERT import BERT
 import numpy as np
 import torch
+from tqdm import tqdm
 
 
 class BCEmbedding:
@@ -25,9 +26,6 @@ class BERTRetriever:
     def set_embeddings(self, embeddings):
         self.embeddings = embeddings
 
-    def get_description_tensors(self):
-        return self.BERT.encode_text(list(map(lambda x: x.get_description(), self.embeddings)))
-
     def get_inner_text_tensors(self):
         return self.BERT.encode_text(list(map(lambda x: x.get_text(), self.embeddings)))
 
@@ -39,16 +37,14 @@ class BERTRetriever:
         return BCEmbedding(processed_description, extracted_text)
 
     @torch.no_grad()
-    def predict(self, query, encoded_descriptions, encoded_sentences):
+    def predict(self, query, encoded_sentences):
         processed_text = self.BERT.preprocess_text(query)
         encoded_text = self.BERT.encode_text(processed_text)
 
         bert_ocr_similarity = self.BERT.similarity_score(encoded_text, encoded_sentences, 1)
-        bert_description_similarity = self.BERT.similarity_score(encoded_text, encoded_descriptions, 1)
 
-        return np.argmax(bert_description_similarity + bert_ocr_similarity)
+        return np.argmax(bert_ocr_similarity)
 
     def batch_predict(self, queries):
-        encoded_descriptions = self.get_description_tensors()
         encoded_inner_text = self.get_inner_text_tensors()
-        return list(map(lambda x: self.predict(x, encoded_descriptions, encoded_inner_text), queries))
+        return list(map(lambda x: self.predict(x, encoded_inner_text), tqdm(queries)))

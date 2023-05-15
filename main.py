@@ -1,32 +1,57 @@
-from tensorflow.keras.datasets import mnist
-from models.classifiers.nCLIPClassifier import nCLIP
-from models.classifiers.bCLIPClassifier import bCLIP
-from sklearn.metrics import accuracy_score
+from models.retrievers.nCLIPRetriever import nCLIPRetriever
+from models.retrievers.bCLIPRetriever import bCLIPRetriever
+from models.retrievers.teCLIPRetriever import teCLIPRetriever
+from models.retrievers.BERTRetriever import BERTRetriever
+import pandas as pd
+from tqdm import tqdm
 from PIL import Image
+from validation.score import Score
 
-(X_train, Y_train), (X_test, Y_test) = mnist.load_data()
+path = "data/dilbert/"
 
-bCLIP = bCLIP()
-nCLIP = nCLIP()
+df = pd.read_csv(path + "annotations.csv")
+filenames = df["original_filename"]
+query_texts = df["Comics_text_box"]
 
-labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-template = 'a photo of the number: "{}".'
+images = []
+truth = []
+label = "A comic panel"
 
-embeddings = []
-for label in labels:
-    embeddings.append(bCLIP.forward(label))
+for i, filename in tqdm(enumerate(filenames)):
+    im = Image.open(path + "panels/" + filename)
+    images.append(im)
+    truth.append(i)
 
-embeddings2 = []
-for label in labels:
-    embeddings2.append(nCLIP.forward(label))
+embeddings_bert = []
+embeddings_bclip = []
+embeddings_nclip = []
+embeddings_teclip = []
+bert = BERTRetriever()
+bCLIP = bCLIPRetriever()
+nCLIP = nCLIPRetriever()
+teCLIP = teCLIPRetriever()
 
-y_pred = []
-y_pred2 = []
-val = 100
-for i in range(val):
-    image = Image.fromarray(X_train[i])
-    y_pred.append(bCLIP.predict(image, embeddings))
-    y_pred2.append(nCLIP.predict(image, embeddings2))
+template = ", containing the text: \"{}\""
 
-print(accuracy_score(y_pred, Y_train[:val]))
-print(accuracy_score(y_pred2, Y_train[:val]))
+for image in tqdm(images):
+    embeddings_bert.append(bert.forward(image, label))
+    embeddings_bclip.append(bCLIP.forward(image, label))
+    embeddings_nclip.append(nCLIP.forward(image, label))
+    embeddings_teclip.append(teCLIP.forward(image, label, template))
+
+bert.set_embeddings(embeddings_bert)
+bCLIP.set_embeddings(embeddings_bclip)
+nCLIP.set_embeddings(embeddings_nclip)
+teCLIP.set_embeddings(embeddings_teclip)
+
+scorer = Score(query_texts, truth)
+
+oscore = scorer.score(bert)
+nscore = scorer.score(nCLIP)
+bscore = scorer.score(bCLIP)
+tescore = scorer.score(teCLIP)
+
+print("OCR Classifier score: " + str(oscore))
+print("CLIP Classifier score: " + str(nscore))
+print("BERT-CLIP Classifier score: " + str(bscore))
+print("teCLIP Classifier score: " + str(tescore))

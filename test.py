@@ -5,6 +5,9 @@ from models.retrievers.BERTRetriever import BERTRetriever
 from sklearn.metrics import accuracy_score
 from PIL import Image
 
+import warnings
+warnings.filterwarnings("ignore")
+
 embeddings_bert = []
 embeddings_bclip = []
 embeddings_nclip = []
@@ -40,7 +43,9 @@ embeddings_bclip.append(bCLIP.forward(image=image, description=text))
 embeddings_nclip.append(nCLIP.forward(image=image, description=text))
 embeddings_teclip.append(teCLIP.forward(image=image, description=text, template=template))
 
-queries = ["A comic of Dilbert talking about passwords", "A comic of Dilbert talking about blockchain", "A diagram"]
+queries = ["A comic of Dilbert talking about passwords",
+           "A comic of Dilbert talking about blockchain",
+           "A diagram of CLIP"]
 
 labels = [0, 1, 2]
 
