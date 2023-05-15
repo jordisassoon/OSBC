@@ -1,12 +1,10 @@
-from transformers import BertTokenizer
 from sentence_transformers import SentenceTransformer, util
 from nltk.corpus import stopwords
 import spacy
 
 
 class BERT:
-    def __init__(self, tokenizer_name, st_name):
-        self.tokenizer = BertTokenizer.from_pretrained(tokenizer_name)
+    def __init__(self, st_name):
         self.sentence_transformer = SentenceTransformer(st_name)
         self.nlp = spacy.load("en_core_web_sm")
 
@@ -17,11 +15,7 @@ class BERT:
             sentence = [token for token in sentence if token not in stopwords.words("english")]
         return ' '.join(sentence)
 
-    def encode_text(self, text):
-        # converts text to tokens and encodes the vector
-        return self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(text))
-
-    def encode_sentences(self, sentences):
+    def encode_text(self, sentences):
         # encodes sentences for similarity scoring
         return self.sentence_transformer.encode(sentences)
 

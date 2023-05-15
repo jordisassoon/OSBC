@@ -1,6 +1,6 @@
 from tensorflow.keras.datasets import mnist
-from models.nCLIPClassifier import nCLIP
-from models.bCLIPClassifier import bCLIP
+from models.classifiers.nCLIPClassifier import nCLIP
+from models.classifiers.bCLIPClassifier import bCLIP
 from sklearn.metrics import accuracy_score
 from PIL import Image
 

@@ -1,9 +1,7 @@
-from .heads.CLIP import CLIP
+from models.heads.CLIP import CLIP
 from tqdm import tqdm
 import numpy as np
 import torch
-import spacy
-nlp = spacy.load("en_core_web_sm")
 
 
 class Embedding:
@@ -16,7 +14,7 @@ class Embedding:
 
 class nCLIPClassifier:
     def __init__(self):
-        self.CLIP = CLIP(model_name="ViT-L/14")
+        self.CLIP = CLIP(model_name="RN50")
         self.embeddings = None
 
     def set_embeddings(self, embeddings):

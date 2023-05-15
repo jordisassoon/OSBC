@@ -1,6 +1,5 @@
 import torch
 import clip
-import torchvision
 
 
 class CLIP:

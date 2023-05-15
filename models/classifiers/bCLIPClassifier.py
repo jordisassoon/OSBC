@@ -1,6 +1,6 @@
-from .heads.OCR import OCR
-from .heads.BERT import BERT
-from .heads.CLIP import CLIP
+from models.heads.OCR import OCR
+from models.heads.BERT import BERT
+from models.heads.CLIP import CLIP
 import numpy as np
 import torch
 from tqdm import tqdm
@@ -21,8 +21,8 @@ class Embedding:
 class bCLIPClassifier:
     def __init__(self):
         self.OCR = OCR(config='--psm 10')
-        self.BERT = BERT(tokenizer_name="bert-base-cased", st_name='all-mpnet-base-v2')
-        self.CLIP = CLIP(model_name="ViT-L/14")
+        self.BERT = BERT(st_name='all-mpnet-base-v2')
+        self.CLIP = CLIP(model_name="RN50")
         self.embeddings = None
 
     def set_embeddings(self, embeddings):
@@ -32,7 +32,7 @@ class bCLIPClassifier:
         return torch.stack((list(map(lambda x: x.get_description().squeeze(), self.embeddings))), 0)
 
     def get_inner_text_tensors(self):
-        return self.BERT.encode_sentences(list(map(lambda x: x.get_text(), self.embeddings)))
+        return self.BERT.encode_text(list(map(lambda x: x.get_text(), self.embeddings)))
 
     @torch.no_grad()
     def forward(self, label):
@@ -51,7 +51,7 @@ class bCLIPClassifier:
         if extracted_text == '':
             return np.argmax(clip_similarity)
 
-        encoded_text = self.BERT.encode_sentences(extracted_text)
+        encoded_text = self.BERT.encode_text(extracted_text)
 
         bert_similarity = self.BERT.similarity_score(encoded_text, encoded_sentences, 1)
 
