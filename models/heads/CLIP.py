@@ -4,7 +4,7 @@ import clip
 
 class CLIP:
     def __init__(self, model_name):
-        self.device = "cpu"
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model, self.preprocess = clip.load(model_name, self.device)
         self.eval()
 

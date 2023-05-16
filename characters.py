@@ -5,7 +5,7 @@ from models.classifiers.teCLIPClassifier import teCLIPClassifier
 from dataloaders.image_loader import ImageLoader
 from validation.score import Score
 
-image_loader = ImageLoader(images_dir='data/characters/training_data')
+image_loader = ImageLoader(images_dir='data/characters/testing_data')
 
 images = []
 labels = []
