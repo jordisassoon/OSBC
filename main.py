@@ -30,9 +30,9 @@ embeddings_bclip = []
 embeddings_nclip = []
 embeddings_teclip = []
 bert = BERTRetriever()  # acc = 0.7346570397111913
-bCLIP = bCLIPRetriever()
-nCLIP = nCLIPRetriever()
-teCLIP = teCLIPRetriever()
+bCLIP = bCLIPRetriever(clip_model="ViT-L/14")
+nCLIP = nCLIPRetriever(clip_model="ViT-L/14")
+teCLIP = teCLIPRetriever(clip_model="ViT-L/14")
 
 template = ", containing the text: \"{}\""
 

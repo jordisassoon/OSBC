@@ -18,9 +18,9 @@ class BCEmbedding:
 
 
 class BERTRetriever:
-    def __init__(self):
-        self.OCR = OCR(config=None)
-        self.BERT = BERT(st_name='all-mpnet-base-v2')
+    def __init__(self, config=None, st_name='all-mpnet-base-v2'):
+        self.OCR = OCR(config=config)
+        self.BERT = BERT(st_name=st_name)
         self.embeddings = None
 
     def set_embeddings(self, embeddings):

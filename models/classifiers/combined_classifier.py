@@ -8,10 +8,10 @@ import torch
 
 
 class Comparator:
-    def __init__(self):
-        self.OCR = OCR(config='--psm 10')
-        self.BERT = BERT(st_name='all-mpnet-base-v2')
-        self.CLIP = CLIP(model_name="RN50")
+    def __init__(self, config='--psm 10', st_name='all-mpnet-base-v2', clip_model="RN50"):
+        self.OCR = OCR(config=config)
+        self.BERT = BERT(st_name=st_name)
+        self.CLIP = CLIP(model_name=clip_model)
         self.CLIP.eval()
         self.embeddings = None
 

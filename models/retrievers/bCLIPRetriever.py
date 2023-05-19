@@ -23,10 +23,10 @@ class BCEmbedding:
 
 
 class bCLIPRetriever:
-    def __init__(self):
-        self.OCR = OCR(config=None)
-        self.BERT = BERT(st_name='all-mpnet-base-v2')
-        self.CLIP = CLIP(model_name="RN50")
+    def __init__(self, config=None, st_name='all-mpnet-base-v2', clip_model="RN50"):
+        self.OCR = OCR(config=config)
+        self.BERT = BERT(st_name=st_name)
+        self.CLIP = CLIP(model_name=clip_model)
         self.embeddings = None
 
     def set_embeddings(self, embeddings):

@@ -17,8 +17,8 @@ class CEmbedding:
 
 
 class nCLIPRetriever:
-    def __init__(self):
-        self.CLIP = CLIP(model_name="RN50")
+    def __init__(self, clip_model="RN50"):
+        self.CLIP = CLIP(model_name=clip_model)
         self.embeddings = None
 
     def set_embeddings(self, embeddings):
