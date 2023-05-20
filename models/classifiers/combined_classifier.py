@@ -35,14 +35,14 @@ class Comparator:
     @torch.no_grad()
     def predict(self, image, descriptions, inner_texts):
         clip_query = self.CLIP.encode_image(image).squeeze()
-        clip_similarity = self.CLIP.similarity_score(clip_query, descriptions)
+        clip_similarity = self.CLIP.similarity_score(clip_query, descriptions).cpu()
 
         nCLIP_prediction = np.argmax(clip_similarity)
 
         extracted_text = self.OCR.extract_text(image)
         extracted_text = self.BERT.preprocess_text(extracted_text, stop_words=True)
         encoded_text = self.BERT.encode_text(extracted_text)
-        ocr_bert_similarity = self.BERT.similarity_score(encoded_text, inner_texts, 1)
+        ocr_bert_similarity = self.BERT.similarity_score(encoded_text, inner_texts, 1).cpu()
 
         bert_prediction = np.argmax(ocr_bert_similarity)
 
@@ -50,7 +50,7 @@ class Comparator:
             return [bert_prediction, nCLIP_prediction, nCLIP_prediction, nCLIP_prediction]
 
         teclip_encoded_text = self.CLIP.encode_text(extracted_text)
-        teclip_text_similarity = self.CLIP.similarity_score(teclip_encoded_text, descriptions)
+        teclip_text_similarity = self.CLIP.similarity_score(teclip_encoded_text, descriptions).cpu()
 
         bCLIP_prediction = np.argmax(clip_similarity + ocr_bert_similarity)
         teCLIP_prediction = np.argmax(clip_similarity + teclip_text_similarity)
