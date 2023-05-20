@@ -1,7 +1,6 @@
 from models.heads.OCR import OCR
 from models.heads.BERT import BERT
 from models.heads.CLIP import CLIP
-from ..embeddings.embedding import Embedding
 import numpy as np
 import torch
 from tqdm import tqdm

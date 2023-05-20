@@ -1,11 +1,11 @@
+from evaluation.classification.classification_test import ClassificationTest
 from models.classifiers.combined_classifier import Comparator
-from validation.score import Score
 import pandas as pd
 from PIL import Image
 from tqdm import tqdm
 import numpy as np
 
-path = "data/mnist/"
+path = "../../data/mnist/"
 
 df = pd.read_csv(path + "mnist_test.csv")
 df = df.dropna()
@@ -22,15 +22,6 @@ labels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 template = "an image of the number: "
 
 comparator = Comparator(clip_model="RN50")
-scorer = Score(images, truth)
-
-embeddings = []
-for label in labels:
-    embeddings.append(comparator.forward(template, label))
-comparator.set_embeddings(embeddings)
-
-scores = scorer.score_comparator(comparator)
-print("OCR Classifier score: " + str(scores[0]))
-print("CLIP Classifier score: " + str(scores[1]))
-print("BERT-CLIP Classifier score: " + str(scores[2]))
-print("teCLIP Classifier score: " + str(scores[3]))
+tester = ClassificationTest(comparator=comparator, queries=images, truth=truth)
+tester.embed(labels=labels, template=template)
+tester.test()
