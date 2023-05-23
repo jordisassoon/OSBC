@@ -1,0 +1,8 @@
+name: teCLIP
+channels:
+  - defaults
+dependencies:
+  - cudatoolkit=11.0
+  - torchvision
+  - pillow
+prefix: C:\Users\jsass\anaconda3\envs\teCLIP
