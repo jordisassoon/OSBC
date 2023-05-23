@@ -24,10 +24,14 @@ def main(args):
         if args.dataset == 'flicker8k':
             path += 'flicker8k/'
 
+            print("reading captions...")
+
             df = pd.read_csv(path + "captions.csv")
             df = df.dropna()
             filenames = df["image"]
             query_texts = df["caption"].astype("string")
+
+            print("loading images...")
 
             last_filename = None
             last_index = -1
@@ -44,16 +48,22 @@ def main(args):
         if args.dataset == 'dilbert':
             path += 'dilbert/'
 
+            print("reading annotations...")
+
             df = pd.read_csv(path + "annotations.csv")
             df = df.drop(["col1", "col2", "col3"], axis=1)
             df = df.dropna()
             filenames = df["original_filename"]
             query_texts = df["Comics_text_box"].astype("string")
 
+            print("loading images...")
+
             for i, filename in tqdm(enumerate(filenames)):
                 im = Image.open(path + "panels/" + filename)
                 images.append(im)
                 truth.append(i)
+
+        print("evaluating...")
 
         comparator = CombinedRetriever(clip_model=args.clip_model, st_name=args.bert_model, config=args.ocr_config)
         tester = RetrievalTest(comparator=comparator, queries=query_texts, truth=truth)
@@ -73,8 +83,11 @@ def main(args):
             df = pd.read_csv(path + "mnist_test.csv")
             df = df.dropna()
 
+            print("loading images...")
+
             for i, row in tqdm(df.iterrows()):
-                im = Image.fromarray(np.array(row[1:]))
+                image_array = np.reshape(np.array(row, dtype=np.int_)[1:], (28, 28))
+                im = Image.fromarray(image_array)
                 images.append(im)
                 truth.append(row[0])
 
@@ -82,7 +95,9 @@ def main(args):
             template = "an image of the number: "
 
         elif args.dataset == 'characters':
-            image_loader = ImageLoader(images_dir='../../data/characters/training_data')
+
+            print("loading images...")
+            image_loader = ImageLoader(images_dir=path+'characters/testing_data')
 
             labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
                       'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
@@ -90,12 +105,14 @@ def main(args):
             template = "an image of the letter: {}"
 
             for i, label in enumerate(labels):
-                labels[i] = format(label, template)
+                labels[i] = template.format(label)
 
             for datapoint in image_loader.dataset:
                 image, label = datapoint
                 images.append(image)
                 truth.append(label)
+
+        print("evaluating...")
 
         comparator = CombinedClassifier(clip_model=args.clip_model, st_name=args.bert_model, config=args.ocr_config)
         tester = ClassificationTest(comparator=comparator, queries=images, truth=truth)
