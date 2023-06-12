@@ -1,11 +1,11 @@
 path = './data/'
-images_dir=path+'characters/validation'
+images_dir=path+'characters/train'
 
 print("loading images...")
 
 from dataloaders.image_loader import ImageLoader
 
-image_loader = ImageLoader(images_dir=images_dir, image_size=(28, 28))
+image_loader = ImageLoader(images_dir=images_dir, image_size=(32, 32))
 dataloader = image_loader.get_loader()
 
 print("images loaded, preparing data...")
