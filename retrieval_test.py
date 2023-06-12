@@ -10,7 +10,7 @@ images = path + "Images"
 
 dataset = Flickr8kDataset(captions, images, 
                              transform=transforms.Compose([
-                                 transforms.Resize((256, 256))
+                                 transforms.Resize((336, 336))
                                  ]))
 
 print("images loaded, preparing data...")
@@ -28,18 +28,30 @@ dataloader = DataLoader(dataset=dataset, batch_size=16, num_workers=0, collate_f
 print("data prepared, loading models...")
 
 from models.osbc import OSBC
+from models.clip import CLIP
+from models.ocr_sbert import OS
 
 osbc = OSBC(ocr_model_name="microsoft/trocr-base-printed",
              sbert_model_name="all-mpnet-base-v2", 
              clip_model_name="openai/clip-vit-base-patch32")
 
+# clip = CLIP(clip_model_name="openai/clip-vit-base-patch32")
+
+# os = OS(ocr_model_name="microsoft/trocr-base-printed",
+#         sbert_model_name="all-mpnet-base-v2")
+
 print("models loaded, running inference...")
 
-predictions = osbc.forward_retrieval(dataloader)
+osbc_predictions = osbc.forward_retrieval(dataloader=dataloader, threshold=0.3)
+# clip_predictions = clip.forward_retrieval(dataloader=dataloader)
+# os_predictions = os.forward_retrieval(dataloader=dataloader)
 
-print("scoring...")
+from sklearn.metrics import accuracy_score
 
 labels = dataset.__getlabels__()
 
-from sklearn.metrics import accuracy_score
-print("CLIP: " + str(accuracy_score(labels, predictions)))
+print("scoring...")
+
+print("OSBC: " + str(accuracy_score(labels, osbc_predictions)))
+# print("OCR-SBERT: " + str(accuracy_score(labels, os_predictions)))
+# print("CLIP: " + str(accuracy_score(labels, clip_predictions)))

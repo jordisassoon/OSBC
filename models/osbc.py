@@ -17,7 +17,8 @@ class OSBC:
 
     def forward_classification(self, dataloader, raw_labels, clip_labels, threshold):
 
-        sbert_labels = self.sbert.encode_text(raw_labels)
+        processed_labels = [self.sbert.process_text(text, stopwords=True) for text in raw_labels]
+        sbert_labels = self.sbert.encode_text(processed_labels)
 
         predictions = np.array([])
 
@@ -26,7 +27,8 @@ class OSBC:
 
             extracted_texts = self.ocr.forward(images=images)
 
-            encoded_texts = self.sbert.encode_text(extracted_texts)
+            processed_texts = [self.sbert.process_text(text, stopwords=True) for text in extracted_texts]
+            encoded_texts = self.sbert.encode_text(processed_texts)
             sbert_output = self.sbert.similarity_score(encoded_texts, sbert_labels)
 
             clip_output = self.clip.forward(images=images, texts=clip_labels).cpu() / 100
@@ -39,7 +41,7 @@ class OSBC:
         
         return predictions
     
-    def forward_retrieval(self, dataloader):
+    def forward_retrieval(self, dataloader, threshold):
 
         sbert_embeddings = None
         image_embeddings = torch.tensor([]).to(self.clip.device)
@@ -49,7 +51,8 @@ class OSBC:
             images, _ = batch
             
             extracted_texts = self.ocr.forward(images=images)
-            text_embeddings = self.sbert.encode_text(extracted_texts)
+            processed_texts = [self.sbert.process_text(text) for text in extracted_texts]
+            text_embeddings = self.sbert.encode_text(processed_texts)
             
             if sbert_embeddings is None:
                 sbert_embeddings = text_embeddings
@@ -65,15 +68,16 @@ class OSBC:
             _, captions = batch
 
             for caption_list in captions:
-                os_text_embeddings = self.sbert.encode_text(caption_list)
-                os_similarity_scores = self.sbert.similarity_score(text_embeddings, sbert_embeddings)
+                processed_texts = [self.sbert.process_text(text) for text in caption_list]
+                os_text_embeddings = self.sbert.encode_text(processed_texts)
+                os_similarity_scores = self.sbert.similarity_score(os_text_embeddings, sbert_embeddings)
 
                 clip_text_embeddings = self.clip_text.forward(text=caption_list)
-                clip_similarity_scores = torch.matmul(text_embeddings, image_embeddings).cpu().numpy()
+                clip_similarity_scores = torch.matmul(clip_text_embeddings, image_embeddings).cpu().numpy() / 100
 
-                print(os_similarity_scores)
-                print(clip_similarity_scores)
+                os_similarity_scores[processed_texts == ""][os_similarity_scores[processed_texts == ""]!=0] = 0
+                os_similarity_scores[os_similarity_scores < threshold] = 0
 
-                predictions = np.append(predictions, np.argmax((os_similarity_score + clip_similarity_scores), axis=1))
+                predictions = np.append(predictions, np.argmax((os_similarity_scores + clip_similarity_scores), axis=1))
 
         return predictions
