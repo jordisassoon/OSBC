@@ -11,6 +11,7 @@ class CLIP:
         self.clip_vision = CLIPVisionComponent(clip_model_name)
         self.clip_text = CLIPTextComponent(clip_model_name)
 
+    @torch.no_grad()
     def forward_classification(self, dataloader, clip_labels):
 
         predictions = np.array([])

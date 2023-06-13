@@ -1,12 +1,12 @@
 path = './data/'
-images_dir=path+'characters/train'
+images_dir=path+'characters/validation'
 
 print("loading images...")
 
 from dataloaders.image_loader import ImageLoader
 
 image_loader = ImageLoader(images_dir=images_dir, image_size=(32, 32))
-dataloader = image_loader.get_loader()
+dataloader = image_loader.get_loader(batch_size=8)
 
 print("images loaded, preparing data...")
 
@@ -31,25 +31,25 @@ from models.osbc import OSBC
 from models.clip import CLIP
 from models.ocr_sbert import OS
 
-osbc = OSBC(ocr_model_name="microsoft/trocr-base-printed",
+osbc = OSBC(ocr_model_name="microsoft/trocr-base-handwritten",
              sbert_model_name="all-mpnet-base-v2", 
-             clip_model_name="openai/clip-vit-base-patch32")
+             clip_model_name="openai/clip-vit-large-patch14")
 
-clip = CLIP(clip_model_name="openai/clip-vit-base-patch32")
+# clip = CLIP(clip_model_name="openai/clip-vit-base-patch16")
 
-os = OS(ocr_model_name="microsoft/trocr-base-printed",
-        sbert_model_name="all-mpnet-base-v2")
+# os = OS(ocr_model_name="microsoft/trocr-base-printed",
+#         sbert_model_name="all-mpnet-base-v2")
 
 print("models loaded, running inference...")
 
-osbc_predictions = osbc.forward_classification(dataloader=dataloader, raw_labels=labels, clip_labels=formatted_labels, threshold=0.3)
-clip_predictions = clip.forward_classification(dataloader=dataloader, clip_labels=formatted_labels)
-os_predictions = os.forward_classification(dataloader=dataloader, raw_labels=labels)
+osbc_predictions = osbc.forward_classification(dataloader=dataloader, raw_labels=labels, clip_labels=formatted_labels)
+# clip_predictions = clip.forward_classification(dataloader=dataloader, clip_labels=formatted_labels)
+# os_predictions = os.forward_classification(dataloader=dataloader, raw_labels=labels)
 
 from sklearn.metrics import accuracy_score
 
 print("scoring...")
 
 print("OSBC: " + str(accuracy_score(truth, osbc_predictions)))
-print("OCR-SBERT: " + str(accuracy_score(truth, os_predictions)))
-print("CLIP: " + str(accuracy_score(truth, clip_predictions)))
+# print("OCR-SBERT: " + str(accuracy_score(truth, os_predictions)))
+# print("CLIP: " + str(accuracy_score(truth, clip_predictions)))

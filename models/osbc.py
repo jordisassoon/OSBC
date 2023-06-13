@@ -15,9 +15,10 @@ class OSBC:
         self.clip_vision = CLIPVisionComponent(clip_model_name)
         self.clip_text = CLIPTextComponent(clip_model_name)
 
-    def forward_classification(self, dataloader, raw_labels, clip_labels, threshold):
+    @torch.no_grad()
+    def forward_classification(self, dataloader, raw_labels, clip_labels):
 
-        processed_labels = [self.sbert.process_text(text, stopwords=True) for text in raw_labels]
+        processed_labels = [self.sbert.process_text(text, stop_words=True) for text in raw_labels]
         sbert_labels = self.sbert.encode_text(processed_labels)
 
         predictions = np.array([])
@@ -27,23 +28,28 @@ class OSBC:
 
             extracted_texts = self.ocr.forward(images=images)
 
-            processed_texts = [self.sbert.process_text(text, stopwords=True) for text in extracted_texts]
+            processed_texts = [self.sbert.process_text(text, stop_words=True) for text in extracted_texts]
             encoded_texts = self.sbert.encode_text(processed_texts)
             sbert_output = self.sbert.similarity_score(encoded_texts, sbert_labels)
 
-            clip_output = self.clip.forward(images=images, texts=clip_labels).cpu() / 100
+            for i, row in enumerate(sbert_output):
+                if processed_texts[i] == "":
+                    row[row != 0] = 0
 
-            m = torch.nn.Threshold(threshold, 0)
-            sbert_preds_clipped = m(sbert_output)
-            clip_preds_clipped = m(clip_output)
+            clip_output = self.clip.forward(images=images, texts=clip_labels).cpu()
+
+            sbert_preds_clipped = torch.nn.functional.normalize(sbert_output, dim=1)
+            clip_preds_clipped = torch.nn.functional.normalize(clip_output, dim=1)
 
             predictions = np.append(predictions, (sbert_preds_clipped + clip_preds_clipped).argmax(dim=1).numpy())
         
         return predictions
     
-    def forward_retrieval(self, dataloader, threshold):
+    @torch.no_grad()
+    def forward_retrieval(self, dataloader):
 
         sbert_embeddings = None
+        raw_texts = None
         image_embeddings = torch.tensor([]).to(self.clip.device)
         predictions = np.array([])
         
@@ -53,11 +59,13 @@ class OSBC:
             extracted_texts = self.ocr.forward(images=images)
             processed_texts = [self.sbert.process_text(text) for text in extracted_texts]
             text_embeddings = self.sbert.encode_text(processed_texts)
-            
+
             if sbert_embeddings is None:
                 sbert_embeddings = text_embeddings
+                raw_texts = processed_texts
             else:
                 sbert_embeddings = np.append(sbert_embeddings, text_embeddings, axis=0)
+                raw_texts = np.append(raw_texts, processed_texts, axis=0)
 
             embeddings = self.clip_vision.forward(images=images)
             image_embeddings = torch.cat((image_embeddings, embeddings), 0)
@@ -73,11 +81,18 @@ class OSBC:
                 os_similarity_scores = self.sbert.similarity_score(os_text_embeddings, sbert_embeddings)
 
                 clip_text_embeddings = self.clip_text.forward(text=caption_list)
-                clip_similarity_scores = torch.matmul(clip_text_embeddings, image_embeddings).cpu().numpy() / 100
+                clip_similarity_scores = torch.matmul(clip_text_embeddings, image_embeddings).cpu()
 
-                os_similarity_scores[processed_texts == ""][os_similarity_scores[processed_texts == ""]!=0] = 0
-                os_similarity_scores[os_similarity_scores < threshold] = 0
+                for i, row in enumerate(os_similarity_scores):
+                    
+                    if processed_texts[i] == "":
+                        row[row != 0] = 0
+                    
+                    row[raw_texts == ""] = 0
+                    row = torch.nn.functional.normalize(row, dim=0)
 
-                predictions = np.append(predictions, np.argmax((os_similarity_scores + clip_similarity_scores), axis=1))
+                clip_preds_clipped = torch.nn.functional.normalize(clip_similarity_scores, dim=1).numpy()
+
+                predictions = np.append(predictions, np.argmax((os_similarity_scores + clip_preds_clipped), axis=1))
 
         return predictions

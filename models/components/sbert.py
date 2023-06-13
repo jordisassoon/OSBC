@@ -23,4 +23,4 @@ class SBERTComponent:
     @staticmethod
     def similarity_score(queries, sentence_embeddings):
         # computes the similarity between a query and each sentence
-        return util.cos_sim(queries, sentence_embeddings)
+        return (util.cos_sim(queries, sentence_embeddings) + 1) / 2

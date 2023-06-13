@@ -10,7 +10,7 @@ images = path + "Images"
 
 dataset = Flickr8kDataset(captions, images, 
                              transform=transforms.Compose([
-                                 transforms.Resize((336, 336))
+                                 transforms.Resize((384, 384))
                                  ]))
 
 print("images loaded, preparing data...")
@@ -33,16 +33,16 @@ from models.ocr_sbert import OS
 
 osbc = OSBC(ocr_model_name="microsoft/trocr-base-printed",
              sbert_model_name="all-mpnet-base-v2", 
-             clip_model_name="openai/clip-vit-base-patch32")
+             clip_model_name="openai/clip-vit-base-patch16")
 
-# clip = CLIP(clip_model_name="openai/clip-vit-base-patch32")
+# clip = CLIP(clip_model_name="openai/clip-vit-base-patch16")
 
 # os = OS(ocr_model_name="microsoft/trocr-base-printed",
 #         sbert_model_name="all-mpnet-base-v2")
 
 print("models loaded, running inference...")
 
-osbc_predictions = osbc.forward_retrieval(dataloader=dataloader, threshold=0.3)
+osbc_predictions = osbc.forward_retrieval(dataloader=dataloader)
 # clip_predictions = clip.forward_retrieval(dataloader=dataloader)
 # os_predictions = os.forward_retrieval(dataloader=dataloader)
 
