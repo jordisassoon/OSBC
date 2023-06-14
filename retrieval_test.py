@@ -35,16 +35,16 @@ osbc = OSBC(ocr_model_name="microsoft/trocr-base-printed",
              sbert_model_name="all-mpnet-base-v2", 
              clip_model_name="openai/clip-vit-base-patch16")
 
-# clip = CLIP(clip_model_name="openai/clip-vit-base-patch16")
+clip = CLIP(clip_model_name="openai/clip-vit-base-patch16")
 
-# os = OS(ocr_model_name="microsoft/trocr-base-printed",
-#         sbert_model_name="all-mpnet-base-v2")
+os = OS(ocr_model_name="microsoft/trocr-base-printed",
+        sbert_model_name="all-mpnet-base-v2")
 
 print("models loaded, running inference...")
 
 osbc_predictions = osbc.forward_retrieval(dataloader=dataloader)
-# clip_predictions = clip.forward_retrieval(dataloader=dataloader)
-# os_predictions = os.forward_retrieval(dataloader=dataloader)
+clip_predictions = clip.forward_retrieval(dataloader=dataloader)
+os_predictions = os.forward_retrieval(dataloader=dataloader)
 
 from sklearn.metrics import accuracy_score
 
@@ -53,5 +53,5 @@ labels = dataset.__getlabels__()
 print("scoring...")
 
 print("OSBC: " + str(accuracy_score(labels, osbc_predictions)))
-# print("OCR-SBERT: " + str(accuracy_score(labels, os_predictions)))
-# print("CLIP: " + str(accuracy_score(labels, clip_predictions)))
+print("OCR-SBERT: " + str(accuracy_score(labels, os_predictions)))
+print("CLIP: " + str(accuracy_score(labels, clip_predictions)))

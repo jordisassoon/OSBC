@@ -18,7 +18,7 @@ class OSBC:
     @torch.no_grad()
     def forward_classification(self, dataloader, raw_labels, clip_labels):
 
-        processed_labels = [self.sbert.process_text(text, stop_words=True) for text in raw_labels]
+        processed_labels = [self.sbert.process_text(text, numeric=True, stop_words=True) for text in raw_labels]
         sbert_labels = self.sbert.encode_text(processed_labels)
 
         predictions = np.array([])
@@ -28,12 +28,12 @@ class OSBC:
 
             extracted_texts = self.ocr.forward(images=images)
 
-            processed_texts = [self.sbert.process_text(text, stop_words=True) for text in extracted_texts]
+            processed_texts = [self.sbert.process_text(text, numeric=True, stop_words=True) for text in extracted_texts]
             encoded_texts = self.sbert.encode_text(processed_texts)
             sbert_output = self.sbert.similarity_score(encoded_texts, sbert_labels)
 
             for i, row in enumerate(sbert_output):
-                if processed_texts[i] == "":
+                if extracted_texts[i] == "":
                     row[row != 0] = 0
 
             clip_output = self.clip.forward(images=images, texts=clip_labels).cpu()
