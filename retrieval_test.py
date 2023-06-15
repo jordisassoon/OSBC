@@ -31,14 +31,18 @@ from models.osbc import OSBC
 from models.clip import CLIP
 from models.ocr_sbert import OS
 
-osbc = OSBC(ocr_model_name="microsoft/trocr-base-printed",
-             sbert_model_name="all-mpnet-base-v2", 
-             clip_model_name="openai/clip-vit-base-patch16")
+ocr_model_name = "microsoft/trocr-base-printed"
+sbert_model_name = "all-mpnet-base-v2"
+clip_model_name = "openai/clip-vit-base-patch32"
 
-clip = CLIP(clip_model_name="openai/clip-vit-base-patch16")
+osbc = OSBC(ocr_model_name=ocr_model_name,
+             sbert_model_name=sbert_model_name, 
+             clip_model_name=clip_model_name)
 
-os = OS(ocr_model_name="microsoft/trocr-base-printed",
-        sbert_model_name="all-mpnet-base-v2")
+clip = CLIP(clip_model_name=clip_model_name)
+
+os = OS(ocr_model_name=ocr_model_name,
+        sbert_model_name=sbert_model_name)
 
 print("models loaded, running inference...")
 
