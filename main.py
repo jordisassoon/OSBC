@@ -32,7 +32,7 @@ def main(args):
             print("images loaded, preparing labels...")
 
             raw_labels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-            template = "an image of the digit {}"
+            template = "an image of the digit: {}"
 
             for label in raw_labels:
                 formatted_labels.append(template.format(label))
@@ -53,8 +53,8 @@ def main(args):
             print("images loaded, preparing labels...")
 
             raw_labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
-            'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
-            'W', 'X', 'Y', 'Z']
+                          'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
+                          'W', 'X', 'Y', 'Z']
             template = "an image of the letter {}"
 
             for label in raw_labels:
@@ -168,5 +168,7 @@ if __name__ == '__main__':
                         help='config for Tesseract', default='microsoft/trocr-base-printed')
     parser.add_argument('--clip_model', type=str, metavar='STRING',
                         help='version of CLIP', default='openai/clip-vit-base-patch16')
+    parser.add_argument('--save', type=bool, metavar='BOOL',
+                        help='save the model, task, and accuracy', default=False)
     args = parser.parse_args()
     main(args)
