@@ -32,8 +32,6 @@ class OSBC:
             encoded_texts = self.sbert.encode_text(processed_texts)
             sbert_output = self.sbert.similarity_score(encoded_texts, sbert_labels)
 
-            sbert_output[sbert_output < 0] = 0
-
             for i, row in enumerate(sbert_output):
                 if extracted_texts[i] == "":
                     row[row != 0] = 0

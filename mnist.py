@@ -1,20 +1,12 @@
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
-image_size=(28, 28)
+image_size=(16, 16)
 
-test_data = datasets.MNIST(
-    root = 'data', 
-    train = False, 
-    transform=transforms.Compose([
-        transforms.Resize(image_size),
-        transforms.CenterCrop(image_size),
-        transforms.PILToTensor(),
-        transforms.Lambda(lambda x: x.repeat(3, 1, 1))
-        ])
-)
+from dataloaders.classification_loaders.mnist_loader import MNISTLoader
 
-dataloader = DataLoader(dataset=test_data, batch_size=8, num_workers=0)
+test_data = MNISTLoader(image_size=image_size)
+dataloader = test_data.get_loader(batch_size=8)
 
 print("images loaded, preparing data...")
 
@@ -37,29 +29,29 @@ from models.osbc import OSBC
 from models.clip import CLIP
 from models.ocr_sbert import OS
 
-ocr_model_name = "microsoft/trocr-base-handwritten"
+ocr_model_name = "microsoft/trocr-base-printed"
 sbert_model_name = "all-mpnet-base-v2"
-clip_model_name = "openai/clip-vit-large-patch14"
+clip_model_name = "openai/clip-vit-base-patch32"
 
 osbc = OSBC(ocr_model_name=ocr_model_name,
              sbert_model_name=sbert_model_name, 
              clip_model_name=clip_model_name)
 
-# clip = CLIP(clip_model_name=clip_model_name)
+clip = CLIP(clip_model_name=clip_model_name)
 
-# os = OS(ocr_model_name=ocr_model_name,
-#         sbert_model_name=sbert_model_name)
+os = OS(ocr_model_name=ocr_model_name,
+        sbert_model_name=sbert_model_name)
 
 print("models loaded, running inference...")
 
 osbc_predictions = osbc.forward_classification(dataloader=dataloader, raw_labels=labels, clip_labels=formatted_labels)
-# clip_predictions = clip.forward_classification(dataloader=dataloader, clip_labels=formatted_labels)
-# os_predictions = os.forward_classification(dataloader=dataloader, raw_labels=labels)
+clip_predictions = clip.forward_classification(dataloader=dataloader, clip_labels=formatted_labels)
+os_predictions = os.forward_classification(dataloader=dataloader, raw_labels=labels)
 
 from sklearn.metrics import accuracy_score
 
 print("scoring...")
 
 print("OSBC: " + str(accuracy_score(truth, osbc_predictions)))
-# print("OCR-SBERT: " + str(accuracy_score(truth, os_predictions)))
-# print("CLIP: " + str(accuracy_score(truth, clip_predictions)))
+print("OCR-SBERT: " + str(accuracy_score(truth, os_predictions)))
+print("CLIP: " + str(accuracy_score(truth, clip_predictions)))

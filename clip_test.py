@@ -19,7 +19,7 @@ class CLIP:
 path = './data/'
 print("loading images...")
 
-from dataloaders.image_loader import ImageLoader
+from dataloaders.classification_loaders.image_loader import ImageLoader
 
 image_loader = ImageLoader(images_dir=path+'characters/validation', image_size=(28, 28))
 

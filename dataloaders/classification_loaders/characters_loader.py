@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
 
-class ImageLoader:
+class CharactersLoader:
     def __init__(self, images_dir, image_size):
         self.dataset = datasets.ImageFolder(root=images_dir, 
                                             transform=transforms.Compose([
