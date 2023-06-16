@@ -1,5 +1,6 @@
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
+import torch
 
 
 class CharactersLoader:
@@ -8,7 +9,9 @@ class CharactersLoader:
                                             transform=transforms.Compose([
                                                 transforms.Resize(image_size),
                                                 transforms.CenterCrop(image_size),
-                                                transforms.PILToTensor()
+                                                transforms.PILToTensor(),
+                                                transforms.Lambda(lambda x: x.repeat(3, 1, 1)),
+                                                transforms.ConvertImageDtype(torch.float),
                                                 ])
                                             )
 

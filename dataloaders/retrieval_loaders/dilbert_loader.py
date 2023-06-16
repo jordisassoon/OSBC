@@ -3,12 +3,12 @@ import pandas as pd
 from torchvision.io import read_image, ImageReadMode
 from torch.utils.data import Dataset
 
-class Flickr8kDataset(Dataset):
+class DilbertDataset(Dataset):
     def __init__(self, annotations_file, img_dir, transform=None):
-        self.img_captions = pd.read_csv(annotations_file)[:10112].groupby("image")["caption"].apply(list).reset_index(name="captions")
+        self.img_captions = pd.read_csv(annotations_file).groupby("image")["caption"].apply(list).reset_index(name="captions")
         self.img_dir = img_dir
         self.transform = transform
-
+    
     def __len__(self):
         return len(self.img_captions)
     

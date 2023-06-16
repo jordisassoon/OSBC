@@ -35,13 +35,16 @@ class OSBC:
             for i, row in enumerate(sbert_output):
                 if extracted_texts[i] == "":
                     row[row != 0] = 0
+                    
+                _sum = row.sum()
+                row[row < 0.7] = 0
+                row /= _sum
 
             clip_output = self.clip.forward(images=images, texts=clip_labels).cpu()
 
-            sbert_preds_clipped = torch.nn.functional.normalize(sbert_output, p=1.0, dim=1)
             clip_preds_clipped = torch.nn.functional.normalize(clip_output, p=1.0, dim=1)
 
-            predictions = np.append(predictions, (sbert_preds_clipped + clip_preds_clipped).argmax(dim=1).numpy())
+            predictions = np.append(predictions, (sbert_output + clip_preds_clipped).argmax(dim=1).numpy())
 
         return predictions
 

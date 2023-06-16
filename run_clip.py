@@ -33,7 +33,7 @@ import torch
 from datasets import load_dataset
 from PIL import Image
 from torchvision.io import ImageReadMode, read_image
-from torchvision.transforms import CenterCrop, ConvertImageDtype, Normalize, Resize, ToTensor
+from torchvision.transforms import CenterCrop, ConvertImageDtype, Normalize, Resize, PILToTensor
 from torchvision.transforms.functional import InterpolationMode
 
 import transformers
@@ -95,7 +95,6 @@ class ModelArguments:
     freeze_text_model: bool = field(
         default=False, metadata={"help": "Whether to freeze the text model parameters or not."}
     )
-
 
 @dataclass
 class DataTrainingArguments:
@@ -190,10 +189,7 @@ class Transform(torch.nn.Module):
     def __init__(self, image_size, mean, std):
         super().__init__()
         self.transforms = torch.nn.Sequential(
-            Resize([image_size], interpolation=InterpolationMode.BICUBIC),
-            CenterCrop(image_size),
-            ConvertImageDtype(torch.float),
-            # Normalize(mean, std),
+            ConvertImageDtype(torch.float)
         )
 
     def forward(self, x) -> torch.Tensor:
@@ -398,10 +394,19 @@ def main():
     import warnings
     warnings.filterwarnings("ignore", category=UserWarning) 
 
-    to_tensor = ToTensor()
+    image_size = (config.vision_config.image_size, config.vision_config.image_size)
+
+    from torchvision import transforms
+
+    transform=transforms.Compose([
+                transforms.Resize(image_size),
+                transforms.CenterCrop(image_size),
+                transforms.PILToTensor(),
+                transforms.Lambda(lambda x: x.repeat(3, 1, 1))
+                ])
 
     def transform_images(examples):
-        images = [to_tensor(image_file.convert("RGB")) for image_file in examples[image_column]]
+        images = [transform(image_file) for image_file in examples[image_column]]
         examples["pixel_values"] = [image_transformations(image) for image in images]
         return examples
 

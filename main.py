@@ -1,6 +1,7 @@
 from dataloaders.classification_loaders.characters_loader import CharactersLoader
 from dataloaders.retrieval_loaders.flickr8k_loader import Flickr8kDataset
 from dataloaders.classification_loaders.mnist_loader import MNISTLoader
+from dataloaders.classification_loaders.cifar_loader import CIFARLoader
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from sklearn.metrics import accuracy_score
@@ -41,13 +42,33 @@ def main(args):
                 _, label = datapoint
                 ground_truth.append(label)
 
+        if args.dataset == "cifar":
+            print("running classification on cifar")
+            print("loading images...")
+
+            test_data = CIFARLoader(image_size=(32, 32))
+            dataloader = test_data.get_loader(batch_size=8)
+            
+            print("images loaded, preparing labels...")
+
+            raw_labels = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+            template = "an image of a {}"
+
+            for label in raw_labels:
+                formatted_labels.append(template.format(label))
+
+            for datapoint in test_data.dataset:
+                _, label = datapoint
+                print(label)
+                ground_truth.append(label)
+
         elif args.dataset == "characters":
             print("running classification on characters")
             print("loading images...")
 
             data_path += "characters/validation"
 
-            image_loader = CharactersLoader(images_dir=data_path, image_size=(16, 16))
+            image_loader = CharactersLoader(images_dir=data_path, image_size=(224, 224))
             dataloader = image_loader.get_loader(batch_size=8)
 
             print("images loaded, preparing labels...")
