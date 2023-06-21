@@ -68,7 +68,7 @@ def main(args):
 
             data_path += "characters/validation/"
 
-            image_loader = CharactersLoader(images_dir=data_path, image_size=(224, 224))
+            image_loader = CharactersLoader(images_dir=data_path, image_size=(16, 16))
             dataloader = image_loader.get_loader(batch_size=8)
 
             print("images loaded, preparing labels...")

@@ -15,7 +15,7 @@ class CharactersDataset(Dataset):
             for image in os.listdir(path=path):
                 # check if the image ends with png
                 if (image.endswith(".png")):
-                    self.images.append(Image.open(f"{path}/{image}").convert("RGB"))
+                    self.images.append(Image.open(f"{path}/{image}"))
                     self.labels.append(i)
     
     def __len__(self):
@@ -36,7 +36,8 @@ class CharactersLoader:
             transforms.Resize(image_size),
             transforms.CenterCrop(image_size),
             transforms.PILToTensor(),
-            transforms.Lambda(lambda x: x.float())
+            transforms.Lambda(lambda x: x.float()),
+            transforms.Lambda(lambda x: x.repeat(3, 1, 1)),
             ])
         self.classes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 
                         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']

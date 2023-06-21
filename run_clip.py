@@ -201,8 +201,8 @@ class Transform(torch.nn.Module):
 
 def collate_fn(examples):
     pixel_values = torch.stack([example["pixel_values"] for example in examples])
-    input_ids = torch.tensor([example["input_ids"] for example in examples])
-    attention_mask = torch.tensor([example["attention_mask"] for example in examples])
+    input_ids = torch.tensor([example["input_ids"] for example in examples], dtype=torch.long)
+    attention_mask = torch.tensor([example["attention_mask"] for example in examples], dtype=torch.long)
     return {
         "pixel_values": pixel_values,
         "input_ids": input_ids,
@@ -398,12 +398,13 @@ def main():
     transform=transforms.Compose([
                 transforms.Resize(image_size),
                 transforms.CenterCrop(image_size),
-                transforms.PILToTensor(),
-                transforms.Lambda(lambda x: x.float())
+                transforms.ToTensor(),
+                transforms.Lambda(lambda x: x.float()),
+                transforms.Lambda(lambda x: x.repeat(3, 1, 1)),
                 ])
 
     def transform_images(examples):
-        images = [transform(image_file.convert("RGB")) for image_file in examples[image_column]]
+        images = [transform(image_file) for image_file in examples[image_column]]
         examples["pixel_values"] = [image_transformations(image) for image in images]
         return examples
 
