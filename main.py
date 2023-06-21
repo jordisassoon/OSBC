@@ -66,7 +66,7 @@ def main(args):
             print("running classification on characters")
             print("loading images...")
 
-            data_path += "characters/validation"
+            data_path += "characters/validation/"
 
             image_loader = CharactersLoader(images_dir=data_path, image_size=(224, 224))
             dataloader = image_loader.get_loader(batch_size=8)
@@ -81,10 +81,8 @@ def main(args):
             for label in raw_labels:
                 formatted_labels.append(template.format(label))
 
-            for datapoint in image_loader.dataset:
-                _, label = datapoint
-                ground_truth.append(label)
-            
+            ground_truth = image_loader.dataset.labels
+   
         else:
             print("dataset \"" + args.dataset + "\" not found.")
             return
@@ -188,7 +186,7 @@ if __name__ == '__main__':
     parser.add_argument('--ocr_model', type=str, metavar='STRING',
                         help='config for Tesseract', default='microsoft/trocr-base-printed')
     parser.add_argument('--clip_model', type=str, metavar='STRING',
-                        help='version of CLIP', default='openai/clip-vit-base-patch16')
+                        help='version of CLIP', default='openai/clip-vit-base-patch32')
     parser.add_argument('--save', type=bool, metavar='BOOL',
                         help='save the model, task, and accuracy', default=False)
     args = parser.parse_args()

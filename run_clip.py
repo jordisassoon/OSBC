@@ -96,6 +96,7 @@ class ModelArguments:
         default=False, metadata={"help": "Whether to freeze the text model parameters or not."}
     )
 
+
 @dataclass
 class DataTrainingArguments:
     """
@@ -189,7 +190,6 @@ class Transform(torch.nn.Module):
     def __init__(self, image_size, mean, std):
         super().__init__()
         self.transforms = torch.nn.Sequential(
-            ConvertImageDtype(torch.float)
         )
 
     def forward(self, x) -> torch.Tensor:
@@ -201,8 +201,8 @@ class Transform(torch.nn.Module):
 
 def collate_fn(examples):
     pixel_values = torch.stack([example["pixel_values"] for example in examples])
-    input_ids = torch.tensor([example["input_ids"] for example in examples], dtype=torch.long)
-    attention_mask = torch.tensor([example["attention_mask"] for example in examples], dtype=torch.long)
+    input_ids = torch.tensor([example["input_ids"] for example in examples])
+    attention_mask = torch.tensor([example["attention_mask"] for example in examples])
     return {
         "pixel_values": pixel_values,
         "input_ids": input_ids,
@@ -278,7 +278,7 @@ def main():
     #
     if data_args.dataset_name is not None:
         # Downloading and loading a dataset from the hub.
-        dataset = load_dataset('imagefolder', data_dir='./data/characters')
+        dataset = load_dataset("imagefolder", data_dir="./data/characters")
     else:
         data_files = {}
         if data_args.train_file is not None:
@@ -385,14 +385,11 @@ def main():
     # We need to tokenize input captions and transform the images.
     def tokenize_captions(examples):
         captions = list(examples[caption_column])
-        captions = list(map(lambda x: "An image of the letter: " + chr(ord('A') + x), captions))
+        captions = list(map(lambda x: "an image of the letter " + chr(ord('A') + x), captions))
         text_inputs = tokenizer(captions)
         examples["input_ids"] = text_inputs.input_ids
         examples["attention_mask"] = text_inputs.attention_mask
         return examples
-    
-    import warnings
-    warnings.filterwarnings("ignore", category=UserWarning) 
 
     image_size = (config.vision_config.image_size, config.vision_config.image_size)
 
@@ -402,11 +399,11 @@ def main():
                 transforms.Resize(image_size),
                 transforms.CenterCrop(image_size),
                 transforms.PILToTensor(),
-                transforms.Lambda(lambda x: x.repeat(3, 1, 1))
+                transforms.Lambda(lambda x: x.float())
                 ])
 
     def transform_images(examples):
-        images = [transform(image_file) for image_file in examples[image_column]]
+        images = [transform(image_file.convert("RGB")) for image_file in examples[image_column]]
         examples["pixel_values"] = [image_transformations(image) for image in images]
         return examples
 
@@ -491,7 +488,7 @@ def main():
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=train_dataset if training_args.do_train else None,
+        train_dataset=train_dataset.shuffle(seed=42) if training_args.do_train else None,
         eval_dataset=eval_dataset if training_args.do_eval else None,
         data_collator=collate_fn,
     )
