@@ -42,7 +42,7 @@ def main(args):
                 _, label = datapoint
                 ground_truth.append(label)
 
-        if args.dataset == "cifar":
+        elif args.dataset == "cifar":
             print("running classification on cifar")
             print("loading images...")
 
@@ -59,7 +59,6 @@ def main(args):
 
             for datapoint in test_data.dataset:
                 _, label = datapoint
-                print(label)
                 ground_truth.append(label)
 
         elif args.dataset == "characters":
