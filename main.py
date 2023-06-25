@@ -1,5 +1,6 @@
 from dataloaders.classification_loaders.characters_loader import CharactersLoader
 from dataloaders.retrieval_loaders.flickr8k_loader import Flickr8kDataset
+from dataloaders.retrieval_loaders.dilbert_loader import DilbertDataset
 from dataloaders.classification_loaders.mnist_loader import MNISTLoader
 from dataloaders.classification_loaders.cifar_loader import CIFARLoader
 from torch.utils.data import DataLoader
@@ -139,6 +140,33 @@ def main(args):
             print("images loaded, preparing labels...")
 
             ground_truth = dataset.__getlabels__()
+        
+        elif args.dataset == "dilbert":
+            print("running retrieval on dilbert")
+            print("loading images...")
+
+            data_path += 'dilbert/'
+            captions = data_path + "captions.csv"
+            images = data_path + "Images"
+
+            dataset = DilbertDataset(captions, images, 
+                                        transform=transforms.Compose([
+                                            transforms.Resize((384, 384))
+                                            ]))
+
+            def collate_fn(list_items):
+                x = []
+                y = []
+                for x_, y_ in list_items:
+                    x.append(x_)
+                    y.append(y_)
+                return x, y
+            
+            dataloader = DataLoader(dataset=dataset, batch_size=16, num_workers=0, collate_fn=collate_fn)
+
+            print("images loaded, preparing labels...")
+
+            ground_truth = dataset.__getlabels__()
 
         else:
             print("dataset \"" + args.dataset + "\" not found.")
@@ -160,10 +188,6 @@ def main(args):
             os = OS(ocr_model_name=args.ocr_model, sbert_model_name="all-mpnet-base-v2")
             os_predictions = os.forward_retrieval(dataloader=dataloader)
             print(accuracy_score(ground_truth, os_predictions))
-
-        else:
-            print("please select a model to evaluate: clip, osbc, or ocr-sbert")
-            return
 
     else:
         print("task \"" + args.task + "\" not found.")

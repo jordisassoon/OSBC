@@ -7,10 +7,11 @@ python run_clip.py \
     --caption_column label \
     --remove_unused_columns=False \
     --do_train  --do_eval \
-    --per_device_train_batch_size="64" \
-    --per_device_eval_batch_size="64" \
-    --learning_rate="5e-5" --warmup_steps="0" --weight_decay 0.1 \
+    --per_device_train_batch_size="4" \
+    --per_device_eval_batch_size="4" \
+    --learning_rate="5e-6" --warmup_steps="0" --weight_decay 0.1 \
     --overwrite_output_dir \
     --report_to wandb \
-    --run_name clip-vit-base-patch32-finetuned-characters \
-    --logging_steps=50 \
+    --run_name clip-vit-large-patch14-finetuned-characters \
+    --logging_steps=1 \
+    --save_steps=5000 \

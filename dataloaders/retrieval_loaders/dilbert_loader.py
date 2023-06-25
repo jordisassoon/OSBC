@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 
 class DilbertDataset(Dataset):
     def __init__(self, annotations_file, img_dir, transform=None):
-        self.img_captions = pd.read_csv(annotations_file).groupby("image")["caption"].apply(list).reset_index(name="captions")
+        self.img_captions = pd.read_csv(annotations_file, sep = ';').groupby("image")["caption"].apply(list).reset_index(name="captions")
         self.img_dir = img_dir
         self.transform = transform
     
