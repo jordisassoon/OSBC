@@ -83,7 +83,9 @@ To run finetuning, head over to the finetuner directory. Here the there is a con
 
 Once training is complete, the model will be saved in the models/finetuned directory. You can use the CLIP model on the command line just like the previous ones, simply by specifying the directory in which it's in.
 
+```
 python main.py classification characters --eval_clip=True --clip_model="models/finetuned/{dir and name of the model}"
+```
 
 ## Contributors
 
