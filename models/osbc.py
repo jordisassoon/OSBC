@@ -26,7 +26,7 @@ class OSBC:
         for batch in tqdm(dataloader):
             images, _ = batch
 
-            extracted_texts = self.ocr.pytesseract_forward(images=images)
+            extracted_texts = self.ocr.forward(images=images)
 
             processed_texts = [self.sbert.process_text(text, numeric=True, stop_words=True) for text in extracted_texts]
             encoded_texts = self.sbert.encode_text(processed_texts)
@@ -59,7 +59,7 @@ class OSBC:
         for batch in tqdm(dataloader):
             images, _ = batch
             
-            extracted_texts = self.ocr.pytesseract_forward(images=images)
+            extracted_texts = self.ocr.forward(images=images)
             processed_texts = [self.sbert.process_text(text) for text in extracted_texts]
             text_embeddings = self.sbert.encode_text(processed_texts)
 

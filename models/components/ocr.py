@@ -16,5 +16,5 @@ class OCRComponent:
         return self.processor.batch_decode(generated_ids, skip_special_tokens=True)
     
     def pytesseract_forward(self, images) -> list:
-        custom_config = r'--oem 3 --psm 10'
+        custom_config = r'--oem 3 --psm 6'
         return [pytesseract.image_to_string(to_pil_image(image), config=custom_config) for image in images]

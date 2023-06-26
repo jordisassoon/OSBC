@@ -76,7 +76,7 @@ def main(args):
             raw_labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
                           'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
                           'W', 'X', 'Y', 'Z']
-            template = "an image of the letter {}"
+            template = "an image of the letter: {}"
 
             for label in raw_labels:
                 formatted_labels.append(template.format(label))
