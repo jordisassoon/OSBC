@@ -278,7 +278,7 @@ def main():
     #
     if data_args.dataset_name is not None:
         # Downloading and loading a dataset from the hub.
-        dataset = load_dataset("imagefolder", data_dir="./data/characters")
+        dataset = load_dataset("imagefolder", data_dir="../data/characters")
     else:
         data_files = {}
         if data_args.train_file is not None:

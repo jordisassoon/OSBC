@@ -1,7 +1,7 @@
 python run_clip.py \
-    --output_dir ./models/finetuned/characters/clip-vit-base-patch32-finetuned-characters \
+    --output_dir ../models/finetuned/characters/clip-vit-base-patch32-finetuned-characters \
     --model_name_or_path openai/clip-vit-base-patch32 \
-    --data_dir $PWD/data \
+    --data_dir ../data \
     --dataset_name boopity \
     --image_column image \
     --caption_column label \
