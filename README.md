@@ -71,15 +71,19 @@ dataset: characters, mnist, cifar, flickr8k, dilbert
 --eval_osbc: Bool (default: False)
 --eval_clip: Bool (default: False)
 --eval_os: Bool (default: False)
---clip_model: openai/clip-vit-base-patch16, openai/clip-vit-base-patch32, openai/clip-vit-large-patch14 
---ocr_model: microsoft/trocr-base-printed, microsoft/trocr-base-handwritten
+--clip_model: openai/clip-vit-base-patch16, openai/clip-vit-base-patch32, openai/clip-vit-large-patch14 (default: openai/clip-vit-base-patch32)
+--ocr_model: microsoft/trocr-base-printed, microsoft/trocr-base-handwritten, psm 6, psm 10 (default: microsoft/trocr-base-printed)
 ```
 
 You must use the right task and dataset combination, and choose at least one model flag.
 
 ## Finetuning CLIP
 
-Information on finetuning coming soon.
+To run finetuning, head over to the finetuner directory. Here the there is a config file to run the training with. This is a temporary implementation of the [VisionTextDualEncoder repo](https://github.com/huggingface/transformers/tree/main/examples/pytorch/contrastive-image-text) for our use case. We also tracked our experiments on [wandb](https://wandb.ai/jordisassoon/huggingface/runs/p38m8r6t?workspace=user-jordisassoon).
+
+Once training is complete, the model will be saved in the models/finetuned directory. You can use the CLIP model on the command line just like the previous ones, simply by specifying the directory in which it's in.
+
+python main.py classification characters --eval_clip=True --clip_model="models/finetuned/{dir and name of the model}"
 
 ## Contributors
 
