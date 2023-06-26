@@ -46,7 +46,7 @@ For all the other datasets, you have to manually download them in the data direc
     └── Images
 ```
 
-The Characters dataset is a subset of the Standard OCR dataset, which only includes the english letters folders.
+The Characters dataset is a subset of the Standard OCR dataset, which only includes the english letters folders.  
 The Dilbert dataset is avaliable upon request.
 
 ## Evaluate
@@ -83,5 +83,5 @@ Information on finetuning coming soon.
 
 ## Contributors
 
-This repo was created by [Jordan Sassoon](https://github.com/jordisassoon)
+This repo was created by [Jordan Sassoon](https://github.com/jordisassoon)  
 For any questions, feel free to reach out.
