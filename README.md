@@ -1,6 +1,6 @@
 # OSBC
 
-This is the official implementation repository of the paper "Does Text Matter? Extending OCR with TrOCR and NLP for Image Classification and Retrieval".
+This is the official implementation repository of the paper "Does Text Matter? Extending OCR with TrOCR and NLP for Image Classification and Retrieval" [(paper)](http://resolver.tudelft.nl/uuid:55a159a7-461a-490e-bc73-5194c0ed3b4e).
 
 ![](/OSBC.jpg)
 
